@@ -304,27 +304,12 @@ export async function railwayUpdateTable(
 // ---------------------------------------------------------------------------
 
 /**
- * GET /bookings - returns the authenticated user's own bookings.
- *
- * IMPORTANT: there is no documented endpoint for an admin to list ALL
- * bookings across all customers. The spec's endpoint summary only documents
- * POST /bookings, GET /bookings, and the two admin approve/reject routes
- * below - there is no GET /admin/bookings. A previous version of this file
- * called /admin/bookings for admin views; that was calling an undocumented,
- * unverified endpoint, which risked silently returning wrong/misleading
- * data (or a 404) and was removed per explicit instruction not to invent or
- * assume endpoints.
- *
- * Practical effect: admin pages that need "every booking" (the bookings
- * management list, dashboard stats, and reports) currently have no
- * supported way to fetch that data from Railway. Those pages surface this
- * limitation directly instead of pretending to have the data - see
- * app/admin/bookings/page.tsx, app/admin/page.tsx, and
- * app/admin/reports/page.tsx. If the real Postman collection does include a
- * booking-listing endpoint for admins, add it here once confirmed.
+ * GET /admin/bookings - returns all bookings (Admin only).
+ * GET /bookings - returns the authenticated user's own bookings (Customer).
  */
-export async function railwayGetBookings(accessToken: string): Promise<RailwayBooking[]> {
-  const res = await railwayRequest<RailwayBooking[]>("/bookings", {
+export async function railwayGetBookings(accessToken: string, isAdmin: boolean = false): Promise<RailwayBooking[]> {
+  const path = isAdmin ? "/admin/bookings" : "/bookings";
+  const res = await railwayRequest<RailwayBooking[]>(path, {
     method: "GET",
     accessToken,
     fallbackErrorMessage: "Gagal mengambil daftar booking.",

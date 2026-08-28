@@ -310,6 +310,30 @@ export async function updateProfileAction(formData: FormData) {
   return { success: true };
 }
 
+export async function listAllBookingsAction() {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    return { error: "Akses ditolak.", bookings: [] };
+  }
+  const rawBookings = await railwayGetBookings(session.accessToken, true);
+  const bookings = rawBookings.map((b: any) => ({
+    id: b.id,
+    bookingCode: `BK-${b.id}`,
+    date: b.bookingDate ? new Date(b.bookingDate).toISOString().split("T")[0] : "",
+    time: b.startTime || "",
+    guests: b.guestcount || 0,
+    status: b.status || "PENDING",
+    notes: b.notes || null,
+    preorderItems: null,
+    createdAt: b.createdAt,
+    customerName: b.user?.name || "Customer",
+    customerEmail: b.user?.email || "-",
+    customerPhone: b.user?.phone || null,
+    tableNumber: b.table ? `Meja ${b.table.number}` : `Meja #${b.tableId}`,
+  }));
+  return { success: true, bookings };
+}
+
 // --------------------------------------------------------
 // CUSTOMER MANAGEMENT (ADMIN, via Railway)
 // --------------------------------------------------------

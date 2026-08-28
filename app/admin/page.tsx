@@ -40,12 +40,6 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <AdminNav active="/admin" />
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 text-xs text-amber-900 flex items-start gap-2">
-        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-        <span>
-          <strong>Booking belum bisa ditampilkan di sini:</strong> API Railway yang terdokumentasi tidak menyediakan endpoint untuk admin melihat seluruh booking pelanggan (tidak ada <code>GET /admin/bookings</code> - yang tersedia hanya <code>PATCH /admin/bookings/:id/approve</code> dan <code>/reject</code>). Buka halaman <Link href="/admin/bookings" className="underline font-bold">Kelola Booking</Link> untuk approve/reject booking secara manual menggunakan ID booking.
-        </span>
-      </div>
       {/* Welcome Banner */}
       <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -123,7 +117,7 @@ export default async function AdminDashboardPage() {
           <div className="bg-red-50 border border-red-200/50 rounded-2xl p-4 mt-4">
             <span className="text-red-950 font-bold block text-xs mb-1">Status Penjelasan</span>
             <p className="text-[11px] text-stone-600 leading-relaxed">
-              <strong>PENDING:</strong> Menunggu verifikasi admin di Railway API.<br />
+              <strong>PENDING:</strong> Menunggu verifikasi admin.<br />
               <strong>APPROVED:</strong> Reservasi telah disetujui admin.<br />
               <strong>REJECTED:</strong> Reservasi telah ditolak admin.
             </p>

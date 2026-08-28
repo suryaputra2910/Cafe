@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { LayoutDashboard, CalendarRange, Grid3X3, Users2, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, CalendarRange, Grid3X3, Users2, ShieldCheck, LogOut, Coffee } from "lucide-react";
+import { logoutAction } from "@/app/actions";
+import { redirect } from "next/navigation";
 
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -9,28 +11,59 @@ const ADMIN_LINKS = [
   { href: "/admin/admins", label: "Admin", icon: ShieldCheck },
 ];
 
-/**
- * Lightweight nav strip for admin pages. There is no shared admin layout in
- * this app (each /admin/* page is standalone), so this is included at the
- * top of each management page instead of introducing a new layout wrapper.
- */
 export default function AdminNav({ active }: { active: string }) {
+  async function handleLogout() {
+    "use server";
+    await logoutAction();
+    redirect("/login");
+  }
+
   return (
-    <div className="flex flex-wrap gap-1.5 bg-white border border-stone-200 rounded-2xl p-1.5 shadow-xs w-fit">
-      {ADMIN_LINKS.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
-            active === href
-              ? "bg-stone-900 text-white"
-              : "text-stone-600 hover:bg-stone-100"
-          }`}
+    <div className="bg-stone-900 border border-stone-800 rounded-3xl p-4 sm:px-6 sm:py-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Brand & Title */}
+      <div className="flex items-center space-x-3">
+        <div className="bg-red-600 text-white p-2 rounded-2xl shadow-md">
+          <Coffee className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="font-extrabold text-white text-base tracking-tight">CafeReserve</span>
+            <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+              Admin
+            </span>
+          </div>
+          <p className="text-xs text-stone-400">Portal Pengelolaan Cafe</p>
+        </div>
+      </div>
+
+      {/* Navigation Links */}
+      <div className="flex flex-wrap items-center justify-center gap-1.5 bg-stone-950/60 border border-stone-800/80 rounded-2xl p-1.5">
+        {ADMIN_LINKS.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              active === href
+                ? "bg-red-600 text-white shadow-sm"
+                : "text-stone-300 hover:text-white hover:bg-stone-800/80"
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Logout Button */}
+      <form action={handleLogout} className="shrink-0">
+        <button
+          type="submit"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 hover:bg-red-600/90 text-stone-300 hover:text-white text-xs font-bold rounded-xl border border-stone-700 hover:border-red-500 transition cursor-pointer"
         >
-          <Icon className="h-3.5 w-3.5" />
-          {label}
-        </Link>
-      ))}
+          <LogOut className="h-3.5 w-3.5 text-red-400 hover:text-white transition" />
+          <span>Keluar</span>
+        </button>
+      </form>
     </div>
   );
 }

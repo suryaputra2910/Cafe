@@ -1,53 +1,45 @@
-import { getSession } from "../../actions";
+import { getSession, listAllBookingsAction } from "../../actions";
 import AdminNav from "@/components/AdminNav";
 import BookingsAdminClient, { BookingItem } from "./BookingsAdminClient";
 import ManualBookingAction from "./ManualBookingAction";
-import { AlertTriangle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function ManageBookingsPage() {
   const session = await getSession();
-
-  // IMPORTANT: there is no documented endpoint for an admin to list every
-  // booking across all customers - the project's spec/Postman summary only
-  // documents POST /bookings, GET /bookings (the caller's own bookings),
-  // and PATCH /admin/bookings/:id/approve|reject. There is no
-  // GET /admin/bookings. Rather than call an undocumented/unverified URL
-  // and risk showing wrong or misleading data, this page is honest about
-  // the gap: it cannot list bookings, but approve/reject still work if a
-  // booking ID is known some other way (e.g. from a WhatsApp confirmation).
-  const results: BookingItem[] = [];
+  const result = await listAllBookingsAction();
+  const results: BookingItem[] = result.bookings || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <AdminNav active="/admin/bookings" />
-      <div>
-        <h1 className="text-2xl font-extrabold text-stone-900 tracking-tight">Kelola Booking</h1>
-        <p className="text-sm text-stone-500">
-          Konfirmasi reservasi masuk, setujui/tolak booking, atau lihat rincian pesanan.
-        </p>
-      </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
-        <div className="text-xs text-amber-900 space-y-1">
-          <p className="font-bold">Daftar booking tidak dapat ditampilkan otomatis.</p>
-          <p>
-            API Railway yang didokumentasikan tidak menyediakan endpoint untuk admin melihat
-            seluruh booking (tidak ada <code className="font-mono bg-amber-100 px-1 rounded">GET /admin/bookings</code> pada
-            Postman collection/spesifikasi yang diberikan - yang tersedia hanya{" "}
-            <code className="font-mono bg-amber-100 px-1 rounded">PATCH /admin/bookings/:id/approve</code> dan{" "}
-            <code className="font-mono bg-amber-100 px-1 rounded">/reject</code>).
-            Mohon konfirmasi ke tim backend apakah endpoint listing booking untuk admin memang belum ada,
-            atau tersedia dengan path lain yang belum didokumentasikan.
+      {/* Header Banner */}
+      <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold mb-2 uppercase tracking-wider">
+            Sistem Reservasi
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Kelola Reservasi & Booking
+          </h1>
+          <p className="text-stone-300 text-sm mt-1 max-w-xl">
+            Konfirmasi reservasi pelanggan, setujui atau tolak status booking secara real-time.
           </p>
+        </div>
+
+        <div className="relative z-10 bg-stone-800/80 border border-stone-700/60 rounded-2xl px-5 py-3 text-right">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400 block">Total Reservasi</span>
+          <span className="text-2xl font-black text-amber-400">{results.length}</span>
         </div>
       </div>
 
-      <ManualBookingAction />
-
-      <BookingsAdminClient initialBookings={results} />
+      {/* Action manual & Client list */}
+      <div className="space-y-6">
+        <ManualBookingAction />
+        <BookingsAdminClient initialBookings={results} />
+      </div>
     </div>
   );
 }
