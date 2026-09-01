@@ -150,7 +150,6 @@ export default function SeatingAreaSelector() {
   const [showHint, setShowHint] = useState(false);
 
   function handleSelect(area: SeatingArea) {
-    if (!area.available) return;
     setSelectedArea(area);
     setShowHint(false);
   }
@@ -195,13 +194,12 @@ export default function SeatingAreaSelector() {
           return (
             <article
               key={area.id}
-              className={`group flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-500 ${
-                isSelected
+              className={`group flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-500 ${isSelected
                   ? "border-amber-600 shadow-xl ring-2 ring-amber-500/40"
                   : isFull
-                    ? "border-stone-200 opacity-70"
+                    ? "border-stone-200"
                     : "border-stone-200/80 shadow-sm hover:border-amber-500/50 hover:shadow-xl"
-              }`}
+                }`}
             >
               {/* Photo with zoom on hover */}
               <div className="relative h-52 w-full shrink-0 overflow-hidden bg-stone-100">
@@ -209,9 +207,8 @@ export default function SeatingAreaSelector() {
                 <img
                   src={area.image}
                   alt={area.name}
-                  className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                    isFull ? "grayscale" : ""
-                  }`}
+                  className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${isFull ? "" : ""
+                    }`}
                 />
 
                 {/* Atmosphere badge */}
@@ -221,9 +218,8 @@ export default function SeatingAreaSelector() {
 
                 {/* Availability badge */}
                 <span
-                  className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${
-                    isFull ? "bg-stone-600/90" : "bg-green-600/90"
-                  }`}
+                  className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${isFull ? "bg-stone-600/90" : "bg-green-600/90"
+                    }`}
                 >
                   {isFull ? "Penuh" : "Tersedia"}
                 </span>
@@ -251,9 +247,8 @@ export default function SeatingAreaSelector() {
                     aria-label="Lihat Fasilitas"
                   >
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-300 ${
-                        isMobileExpanded ? "rotate-180 text-amber-800" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform duration-300 ${isMobileExpanded ? "rotate-180 text-amber-800" : ""
+                        }`}
                     />
                   </button>
                 </div>
@@ -275,11 +270,10 @@ export default function SeatingAreaSelector() {
 
                 {/* Smooth Expandable Facilities Section (Hover on desktop, click on mobile) */}
                 <div
-                  className={`grid transition-all duration-500 ease-in-out ${
-                    isMobileExpanded
+                  className={`grid transition-all duration-500 ease-in-out ${isMobileExpanded
                       ? "grid-rows-[1fr] opacity-100 mt-4 border-t border-stone-100 pt-3"
                       : "grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-hover:mt-4 group-hover:border-t group-hover:border-stone-100 group-hover:pt-3"
-                  }`}
+                    }`}
                 >
                   <div className="overflow-hidden">
                     <div className="transform transition-transform duration-500 ease-in-out translate-y-2 group-hover:translate-y-0">
@@ -306,20 +300,16 @@ export default function SeatingAreaSelector() {
                 <button
                   type="button"
                   onClick={() => handleSelect(area)}
-                  disabled={isFull}
-                  className={`mt-5 w-full rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${
-                    isFull
-                      ? "cursor-not-allowed bg-stone-200 text-stone-500"
-                      : isSelected
-                        ? "cursor-pointer bg-amber-500 text-[#4A3228] shadow-sm"
-                        : "cursor-pointer bg-[#5C4033] text-white hover:bg-[#4A3228]"
-                  }`}
+                  className={`mt-5 w-full rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${isSelected
+                      ? "cursor-pointer bg-amber-500 text-[#4A3228] shadow-sm hover:bg-amber-400"
+                      : "cursor-pointer bg-[#5C4033] text-white hover:bg-[#4A3228]"
+                    }`}
                 >
-                  {isFull
-                    ? "Area Penuh"
-                    : isSelected
-                      ? "Area Dipilih ✓"
-                      : "Pilih Area"}
+                  {isSelected
+                    ? "Area Dipilih ✓"
+                    : isFull
+                      ? "Area Penuh"
+                      : "Lebih Lengkap"}
                 </button>
               </div>
             </article>
@@ -336,11 +326,10 @@ export default function SeatingAreaSelector() {
           </p>
         ) : (
           <p
-            className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors duration-300 ${
-              showHint
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors duration-300 ${showHint
                 ? "bg-amber-100 text-amber-900"
                 : "bg-stone-100 text-stone-500"
-            }`}
+              }`}
           >
             <Info className="h-3.5 w-3.5" />
             Silakan pilih area tempat duduk terlebih dahulu.
@@ -350,11 +339,10 @@ export default function SeatingAreaSelector() {
         <button
           type="button"
           onClick={handleReserve}
-          className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold shadow-sm transition-all duration-300 sm:w-auto ${
-            selectedArea
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold shadow-sm transition-all duration-300 sm:w-auto ${selectedArea
               ? "cursor-pointer bg-amber-500 text-[#4A3228] hover:bg-amber-400 hover:shadow-md"
               : "cursor-pointer bg-stone-300 text-stone-600 hover:bg-stone-400"
-          }`}
+            }`}
         >
           Reservasi Sekarang
           <ArrowRight className="h-4 w-4" />

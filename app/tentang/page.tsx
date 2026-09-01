@@ -68,15 +68,6 @@ export default async function TentangPage() {
                   </span>
                 </div>
               </div>
-              <div className="pt-4">
-                <Link
-                  href="/reservasi"
-                  className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-bold text-[#4A3228] shadow-sm transition hover:bg-amber-400"
-                >
-                  Reservasi Meja
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
             </div>
           </div>
         </div>

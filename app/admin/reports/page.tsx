@@ -1,25 +1,18 @@
-import { getSession } from "../../actions";
-import { railwayGetTables } from "@/lib/railway";
 import AdminNav from "@/components/AdminNav";
-import { 
-  BarChart3, 
+import { railwayGetCustomers, railwayGetTables } from "@/lib/railway";
+import {
   AlertCircle,
   Grid3X3,
+  Users2
 } from "lucide-react";
+import { getSession } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function CafeReportsPage() {
   const session = await getSession();
   const rwTables = session?.accessToken ? await railwayGetTables(session.accessToken) : [];
-
-  // NOTE: booking-derived analytics (table popularity, busy hours, status
-  // distribution, total bookings) all require seeing every customer's
-  // bookings. There is no documented endpoint for that (only GET /bookings -
-  // the caller's own bookings - and PATCH /admin/bookings/:id/approve|reject
-  // are documented). Rather than compute and display statistics from an
-  // unverified/likely-incomplete data source, this page is upfront about
-  // the gap instead of showing numbers that could be silently wrong.
+  const rwCustomers = session?.accessToken ? await railwayGetCustomers(session.accessToken) : [];
 
   return (
     <div className="space-y-8">
@@ -57,13 +50,16 @@ export default async function CafeReportsPage() {
         <div>
           <span className="block text-xs text-stone-500 font-bold uppercase tracking-wider">Jumlah Meja Terdaftar</span>
           <span className="text-2xl font-black text-stone-900 mt-1 block">{rwTables.length} Meja</span>
-          <span className="text-[10px] text-stone-400 block mt-0.5">Dari GET /tables di Railway API</span>
         </div>
       </div>
-
-      <div className="bg-white rounded-3xl p-8 border border-stone-200 shadow-xs text-center text-stone-400">
-        <BarChart3 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-        <p className="text-sm italic">Grafik meja terpopuler, jam ramai, dan distribusi status akan muncul di sini setelah endpoint booking untuk admin tersedia.</p>
+      <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs flex items-center w-fit">
+        <div className="bg-green-50 text-green-800 p-4 rounded-2xl shrink-0">
+          <Users2 className="h-6 w-6" />
+        </div>
+        <div>
+          <span className="block text-xs text-stone-500 font-bold uppercase tracking-wider">Jumlah Customer Terdaftar</span>
+          <span className="text-2xl font-black text-stone-900 mt-1 block">{rwCustomers.length} Customer</span>
+        </div>
       </div>
     </div>
   );

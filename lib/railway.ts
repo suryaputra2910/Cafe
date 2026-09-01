@@ -7,7 +7,7 @@
 // leave it unimplemented and surface that clearly to the caller instead of
 // guessing at a URL.
 //
-// Documented endpoints (see project spec section 21):
+// Documented endpoints (from Swagger: https://cafereserved-production.up.railway.app/api/docs):
 //   POST   /auth/register
 //   POST   /auth/admin
 //   POST   /auth/login
@@ -21,23 +21,20 @@
 //   DELETE /admin/:adminId
 //   POST   /tables
 //   GET    /tables
+//   GET    /tables/:id
 //   PATCH  /tables/:tableId
+//   DELETE /tables/:id (NEW - added in latest Swagger)
 //   POST   /bookings
 //   GET    /bookings
+//   GET    /bookings/:id
+//   PATCH  /bookings/:id/cancel (NEW - added in latest Swagger)
+//   GET    /admin/bookings
+//   GET    /admin/bookings/:id
 //   PATCH  /admin/bookings/:bookingId/approve
 //   PATCH  /admin/bookings/:bookingId/reject
-//
-// NOTE ON ADMIN BOOKING LISTING: there is no documented endpoint for an
-// admin to list ALL bookings across customers - only the two approve/reject
-// sub-routes under /admin/bookings/:id are documented. See the note on
-// railwayGetBookings() below for what this means in practice.
+//   PATCH  /admin/bookings/:id/complete (NEW - added in latest Swagger)
 //
 // NOT available anywhere in the documented API (confirmed absent):
-//   - No endpoint for an admin to list all bookings (GET /admin/bookings is
-//     NOT documented - only approve/reject exist under that path).
-//   - No endpoint for a customer to cancel/delete their own booking.
-//   - No endpoint to mark a booking "completed".
-//   - No DELETE endpoint for tables.
 //   - No endpoint to change a user's password directly (PATCH /customer/:id
 //     example body only shows name/phone).
 // Features that would require these must not fabricate a local-only stand-in
@@ -299,6 +296,15 @@ export async function railwayUpdateTable(
   });
 }
 
+/** DELETE /tables/:tableId. Admin auth required. */
+export async function railwayDeleteTable(accessToken: string, tableId: number): Promise<RailwayResult> {
+  return railwayRequest(`/tables/${tableId}`, {
+    method: "DELETE",
+    accessToken,
+    fallbackErrorMessage: "Gagal menghapus meja.",
+  });
+}
+
 // ---------------------------------------------------------------------------
 // BOOKINGS
 // ---------------------------------------------------------------------------
@@ -352,6 +358,24 @@ export async function railwayRejectBooking(accessToken: string, bookingId: numbe
     method: "PATCH",
     accessToken,
     fallbackErrorMessage: "Gagal menolak reservasi.",
+  });
+}
+
+/** PATCH /bookings/:bookingId/cancel. Customer can cancel their own booking. */
+export async function railwayCancelBooking(accessToken: string, bookingId: number): Promise<RailwayResult> {
+  return railwayRequest(`/bookings/${bookingId}/cancel`, {
+    method: "PATCH",
+    accessToken,
+    fallbackErrorMessage: "Gagal membatalkan reservasi.",
+  });
+}
+
+/** PATCH /admin/bookings/:bookingId/complete. Admin auth required. */
+export async function railwayCompleteBooking(accessToken: string, bookingId: number): Promise<RailwayResult> {
+  return railwayRequest(`/admin/bookings/${bookingId}/complete`, {
+    method: "PATCH",
+    accessToken,
+    fallbackErrorMessage: "Gagal menyelesaikan reservasi.",
   });
 }
 

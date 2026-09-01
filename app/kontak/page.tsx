@@ -16,10 +16,10 @@ export default async function KontakPage() {
     return acc;
   }, {} as Record<string, string>);
   const cafeName = settingsMap["cafe_name"] || "CafeReserve";
-  const cafePhone = settingsMap["cafe_phone"] || "6281234567890";
+  const cafePhone = settingsMap["cafe_phone"] || "6283857642962";
   const cafeAddress =
     settingsMap["cafe_address"] ||
-    "Jl. Senopati Raya No. 12, Kebayoran Baru, Jakarta Selatan";
+    "Jl. Danau Ranau, Sawojajar, Kec. Kedungkandang, Kota Malang, Jawa Timur 65139";
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans">
       <Navbar
@@ -64,9 +64,7 @@ export default async function KontakPage() {
               </div>
               <div>
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(
-                    cafeAddress
-                  )}`}
+                  href={`https://maps.app.goo.gl/ju2PhUyKULqb5e399?g_st=ic`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-amber-800 px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-amber-900 hover:shadow-md"

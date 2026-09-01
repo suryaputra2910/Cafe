@@ -1,25 +1,27 @@
 "use server";
 import { db } from "@/db";
-import { settings } from "@/db/schema";
 import { safeQuery } from "@/db/ensure";
-import { cookies } from "next/headers";
+import { settings } from "@/db/schema";
 import {
-  railwayLogin,
-  railwayRegister,
-  railwayCreateBooking,
-  railwayGetBookings,
-  railwayGetTables,
-  railwayCreateTable,
-  railwayUpdateTable,
-  railwayApproveBooking,
-  railwayRejectBooking,
-  railwayGetCustomers,
-  railwayUpdateCustomer,
-  railwayDeleteCustomer,
-  railwayGetAdmins,
-  railwayUpdateAdmin,
-  railwayDeleteAdmin,
+    railwayApproveBooking,
+    railwayCancelBooking,
+    railwayCompleteBooking,
+    railwayCreateBooking,
+    railwayCreateTable,
+    railwayDeleteAdmin,
+    railwayDeleteCustomer,
+    railwayDeleteTable,
+    railwayGetAdmins,
+    railwayGetBookings,
+    railwayGetCustomers,
+    railwayLogin,
+    railwayRegister,
+    railwayRejectBooking,
+    railwayUpdateAdmin,
+    railwayUpdateCustomer,
+    railwayUpdateTable
 } from "@/lib/railway";
+import { cookies } from "next/headers";
 
 // NOTE ON DATA SOURCE: authentication, customers, admins, tables, and
 // bookings are now sourced exclusively from the Railway backend - there is
@@ -171,11 +173,16 @@ export async function bookTableAction(data: {
  * returns a clear "unsupported" result. The UI should not offer a working
  * cancel button - see app/customer/my-bookings/page.tsx.
  */
-export async function cancelBookingAction(_bookingId: number) {
-  return {
-    error:
-      "Pembatalan reservasi mandiri belum didukung oleh API. Hubungi cafe langsung untuk membatalkan reservasi.",
-  };
+export async function cancelBookingAction(bookingId: number) {
+  const session = await getSession();
+  if (!session) {
+    return { error: "Anda harus login terlebih dahulu." };
+  }
+  const res = await railwayCancelBooking(session.accessToken, bookingId);
+  if (!res.ok) {
+    return { error: res.message || "Gagal membatalkan reservasi." };
+  }
+  return { success: true };
 }
 
 export async function approveBookingAction(bookingId: number) {
@@ -203,14 +210,19 @@ export async function rejectBookingAction(bookingId: number) {
 }
 
 /**
- * NOT SUPPORTED: Railway has no endpoint to mark a booking "completed" -
- * only approve/reject exist. Returning a clear error instead of quietly
- * updating a local row that nothing else reads.
+ * PATCH /admin/bookings/:bookingId/complete. Mark a booking as completed.
+ * Admin auth required.
  */
-export async function completeBookingAction(_bookingId: number) {
-  return {
-    error: "API Railway belum menyediakan endpoint untuk menandai reservasi sebagai selesai.",
-  };
+export async function completeBookingAction(bookingId: number) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    return { error: "Akses ditolak. Anda bukan admin." };
+  }
+  const res = await railwayCompleteBooking(session.accessToken, bookingId);
+  if (!res.ok) {
+    return { error: res.message || "Gagal menyelesaikan reservasi." };
+  }
+  return { success: true };
 }
 
 // --------------------------------------------------------
@@ -263,10 +275,16 @@ export async function updateTableAction(
  * Table removal is intentionally not offered in the UI - see
  * app/admin/tables/page.tsx, which now offers status changes only.
  */
-export async function deleteTableAction(_tableId: number) {
-  return {
-    error: "API Railway belum menyediakan endpoint untuk menghapus meja.",
-  };
+export async function deleteTableAction(tableId: number) {
+  const session = await getSession();
+  if (!session || session.role !== "admin") {
+    return { error: "Akses ditolak." };
+  }
+  const res = await railwayDeleteTable(session.accessToken, tableId);
+  if (!res.ok) {
+    return { error: res.message || "Gagal menghapus meja." };
+  }
+  return { success: true };
 }
 
 // --------------------------------------------------------

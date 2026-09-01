@@ -1,15 +1,13 @@
-import { listCustomersAction, deleteCustomerAction } from "../../actions";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
-import CustomerEditForm from "./CustomerEditForm";
 import {
-  Users2,
   Mail,
   Phone,
   PhoneCall,
-  Trash2,
+  Users2,
 } from "lucide-react";
+import { listCustomersAction } from "../../actions";
+import CustomerEditForm from "./CustomerEditForm";
+import DeleteCustomerButton from "./DeleteCustomerButton";
 
 export const dynamic = "force-dynamic";
 
@@ -21,19 +19,6 @@ export default async function ManageCustomersPage(props: {
   // Customers come exclusively from Railway - GET /customer.
   const res = await listCustomersAction();
   const customersList = res.customers || [];
-
-  async function handleDelete(formData: FormData) {
-    "use server";
-    const id = parseInt(formData.get("customerId") as string, 10);
-    if (!isNaN(id)) {
-      const result = await deleteCustomerAction(id);
-      if (result?.error) {
-        redirect(`/admin/customers?error=${encodeURIComponent(result.error)}`);
-      }
-      revalidatePath("/admin/customers");
-      redirect(`/admin/customers?success=Customer+berhasil+dihapus%21`);
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -109,21 +94,10 @@ export default async function ManageCustomersPage(props: {
                     initialName={c.name || ""}
                     initialPhone={c.phone || ""}
                   />
-                  <form
-                    action={handleDelete}
-                    onSubmit={(e) => {
-                      if (!confirm(`Hapus customer ${name}? Tindakan ini permanen.`)) e.preventDefault();
-                    }}
-                  >
-                    <input type="hidden" name="customerId" value={c.id} />
-                    <button
-                      type="submit"
-                      className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl transition border border-red-200/50"
-                      title="Hapus Customer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </form>
+                  <DeleteCustomerButton
+                    customerId={c.id}
+                    customerName={name}
+                  />
                 </div>
               </div>
             );

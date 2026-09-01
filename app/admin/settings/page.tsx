@@ -1,18 +1,18 @@
 import { db } from "@/db";
-import { settings } from "@/db/schema";
 import { safeQuery } from "@/db/ensure";
-import { updateSettingsAction } from "../../actions";
-import { revalidatePath } from "next/cache";
-import { 
-  Settings, 
-  CheckCircle, 
-  AlertTriangle, 
-  Coffee, 
-  Phone, 
-  Clock, 
-  MapPin, 
-  FileText 
+import { settings } from "@/db/schema";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Coffee,
+  MapPin,
+  Phone,
+  Settings
 } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { updateSettingsAction } from "../../actions";
 export const dynamic = "force-dynamic";
 export default async function CafeSettingsPage(props: {
   searchParams: Promise<{ success?: string; error?: string }>;
@@ -51,11 +51,7 @@ export default async function CafeSettingsPage(props: {
       redirect(`/admin/settings?success=Pengaturan+berhasil+disimpan%21`);
     }
   }
-  // Redirect helper
-  function redirect(url: string) {
-    const r = require("next/navigation").redirect;
-    r(url);
-  }
+
   return (
     <div className="space-y-8">
       <div>

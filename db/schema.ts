@@ -40,17 +40,6 @@ export const bookings = pgTable("bookings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Menu Items (for Pre-orders and browsing)
-export const menuItems = pgTable("menu_items", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  category: text("category").notNull(), // Makanan, Minuman, Cemilan
-  price: integer("price").notNull(),
-  image: text("image"), // URL to image or icon
-  description: text("description"),
-  isAvailable: boolean("is_available").notNull().default(true),
-});
-
 // App Settings
 export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),

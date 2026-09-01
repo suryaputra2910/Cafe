@@ -1,14 +1,12 @@
-import { listAdminsAction, deleteAdminAction } from "../../actions";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
-import AdminEditForm from "./AdminEditForm";
 import {
-  ShieldCheck,
   Mail,
   Phone,
-  Trash2,
+  ShieldCheck,
 } from "lucide-react";
+import { listAdminsAction } from "../../actions";
+import AdminEditForm from "./AdminEditForm";
+import DeleteAdminButton from "./DeleteAdminButton";
 
 export const dynamic = "force-dynamic";
 
@@ -20,19 +18,6 @@ export default async function ManageAdminsPage(props: {
   // Admins come exclusively from Railway - GET /admin.
   const res = await listAdminsAction();
   const adminsList = res.admins || [];
-
-  async function handleDelete(formData: FormData) {
-    "use server";
-    const id = parseInt(formData.get("adminId") as string, 10);
-    if (!isNaN(id)) {
-      const result = await deleteAdminAction(id);
-      if (result?.error) {
-        redirect(`/admin/admins?error=${encodeURIComponent(result.error)}`);
-      }
-      revalidatePath("/admin/admins");
-      redirect(`/admin/admins?success=Admin+berhasil+dihapus%21`);
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -98,21 +83,10 @@ export default async function ManageAdminsPage(props: {
                           initialEmail={a.email}
                           initialPhone={a.phone || ""}
                         />
-                        <form
-                          action={handleDelete}
-                          onSubmit={(e) => {
-                            if (!confirm(`Hapus admin ${name}? Tindakan ini permanen.`)) e.preventDefault();
-                          }}
-                        >
-                          <input type="hidden" name="adminId" value={a.id} />
-                          <button
-                            type="submit"
-                            className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl transition border border-red-200/50 cursor-pointer"
-                            title="Hapus Admin"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </form>
+                        <DeleteAdminButton
+                          adminId={a.id}
+                          adminName={name}
+                        />
                       </div>
                     </td>
                   </tr>

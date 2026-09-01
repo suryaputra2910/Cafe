@@ -1,23 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { 
-  Check, 
-  ChevronRight, 
-  Utensils, 
-  Calendar, 
-  Users, 
-  Clock, 
-  FileText, 
-  Info, 
-  Plus, 
-  Minus, 
-  CheckCircle2, 
-  PhoneCall,
-  Search,
-  ChevronLeft
+import {
+    Calendar,
+    Check,
+    CheckCircle2,
+    ChevronRight,
+    Info,
+    PhoneCall,
+    Users,
+    Utensils
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { bookTableAction } from "../../actions";
 
 interface Table {
@@ -49,8 +43,8 @@ interface BookingFormClientProps {
 export default function BookingFormClient({ tables, menus, cafePhone, userName }: BookingFormClientProps) {
   const router = useRouter();
   
-  // Step 1 or Step 2 or Step 3 (Success)
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  // Step 1 or Step 2 (Success) - removed menu selection step
+  const [step, setStep] = useState<1 | 2>(1);
 
   // Form Fields
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
@@ -58,12 +52,6 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
   const [time, setTime] = useState("12:00");
   const [guests, setGuests] = useState(2);
   const [notes, setNotes] = useState("");
-
-  // Pre-order quantities (Map of itemId -> quantity)
-  const [preorderQuantities, setPreorderQuantities] = useState<Record<number, number>>({});
-  
-  // Menu Category Filter
-  const [menuCategoryFilter, setMenuCategoryFilter] = useState("Semua");
 
   // Submitting States
   const [isPending, setIsPending] = useState(false);
@@ -73,37 +61,9 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
   // Get selected table object
   const selectedTable = tables.find(t => t.id === selectedTableId);
 
-  // Compute overall preorder price
-  const selectedPreorderItems = menus.filter(item => (preorderQuantities[item.id] || 0) > 0);
-  const preorderTotal = selectedPreorderItems.reduce((acc, item) => {
-    return acc + (item.price * (preorderQuantities[item.id] || 0));
-  }, 0);
-
   // Format helper for Rupiah
   const formatRupiah = (num: number) => {
     return "Rp " + num.toLocaleString("id-ID");
-  };
-
-  const incrementMenu = (id: number) => {
-    setPreorderQuantities(prev => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1
-    }));
-  };
-
-  const decrementMenu = (id: number) => {
-    setPreorderQuantities(prev => {
-      const current = prev[id] || 0;
-      if (current <= 1) {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      }
-      return {
-        ...prev,
-        [id]: current - 1
-      };
-    });
   };
 
   const handleNextToStep2 = () => {
@@ -124,7 +84,8 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
       setError(`Kapasitas ${selectedTable.number} maksimal ${selectedTable.capacity} orang.`);
       return;
     }
-    setStep(2);
+    // Directly submit instead of going to Step 2
+    handleFinalSubmit();
   };
 
   const handleBackToStep1 = () => {
@@ -135,13 +96,8 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
     setIsPending(true);
     setError(null);
 
-    // Format preorders as array of JSON objects
-    const formattedPreorders = selectedPreorderItems.map(item => ({
-      itemId: item.id,
-      name: item.name,
-      qty: preorderQuantities[item.id],
-      price: item.price
-    }));
+    // No preorder items, just empty array
+    const formattedPreorders: Array<{ itemId: number; name: string; qty: number; price: number }> = [];
 
     try {
       const res = await bookTableAction({
@@ -160,7 +116,7 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
         // Railway's booking response has an `id`, not a `bookingCode` - build
         // a readable reference code from the real id instead of inventing one.
         setSuccessBookingCode(`BK-${res.booking.id}`);
-        setStep(3);
+        setStep(2);
         setIsPending(false);
       }
     } catch (err: any) {
@@ -173,12 +129,6 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
   const getWhatsAppLink = () => {
     if (!successBookingCode || !selectedTable) return "#";
 
-    const preorderText = selectedPreorderItems.map(item => {
-      const qty = preorderQuantities[item.id];
-      const subtotal = item.price * qty;
-      return `- ${item.name} (${qty}x) = ${formatRupiah(subtotal)}`;
-    }).join("\n");
-
     const message = `Halo CafeReserve! Saya ingin mengonfirmasi reservasi saya:
 
 *KODE BOOKING: ${successBookingCode}*
@@ -188,11 +138,6 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
 - Tanggal: ${date}
 - Pukul: ${time}
 - Jumlah Tamu: ${guests} Orang
-
-*PRE-ORDER MENU:*
-${selectedPreorderItems.length > 0 ? preorderText : "- Tidak ada pre-order menu (Hanya reservasi meja)"}
-
-${selectedPreorderItems.length > 0 ? `*TOTAL PRE-ORDER: ${formatRupiah(preorderTotal)}*` : ""}
 - Catatan Khusus: ${notes || "-"}
 
 Terima kasih! Mohon konfirmasi reservasi saya.`;
@@ -203,13 +148,6 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
   // Railway's table model has no location field, so tables are shown
   // unfiltered (the old location-pill filter was based on fabricated data).
   const filteredTables = tables;
-
-  // Menu Category list filter
-  const categories = ["Semua", "Makanan", "Minuman", "Cemilan"];
-  const filteredMenus = menus.filter(m => {
-    if (menuCategoryFilter === "Semua") return true;
-    return m.category === menuCategoryFilter;
-  });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -222,13 +160,8 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
         </div>
         <div className="h-0.5 bg-stone-200 flex-1 mx-4"></div>
         <div className="flex items-center space-x-2">
-          <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? "bg-amber-800 text-white" : "bg-stone-200 text-stone-600"}`}>2</span>
-          <span className={`font-bold ${step === 2 ? "text-amber-800" : "text-stone-500"}`}>Pre-order Menu</span>
-        </div>
-        <div className="h-0.5 bg-stone-200 flex-1 mx-4"></div>
-        <div className="flex items-center space-x-2">
-          <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${step >= 3 ? "bg-green-600 text-white" : "bg-stone-200 text-stone-600"}`}>3</span>
-          <span className={`font-bold ${step === 3 ? "text-green-600" : "text-stone-500"}`}>Kirim WhatsApp</span>
+          <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? "bg-green-600 text-white" : "bg-stone-200 text-stone-600"}`}>2</span>
+          <span className={`font-bold ${step === 2 ? "text-green-600" : "text-stone-500"}`}>Konfirmasi WhatsApp</span>
         </div>
       </div>
 
@@ -414,180 +347,15 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
               onClick={handleNextToStep2}
               className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-amber-950 font-black rounded-xl transition text-sm flex items-center justify-center group uppercase tracking-wider shadow-md cursor-pointer"
             >
-              <span>Lanjut Pilih Pre-order</span>
+              <span>Selesaikan & Book Meja</span>
               <ChevronRight className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition" />
             </button>
           </div>
         </>
       )}
 
-      {/* STEP 2: PRE-ORDER MENU */}
-      {step === 2 && (
-        <>
-          {/* Menu Selection Form */}
-          <div className="lg:col-span-8 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-100 pb-4 gap-4">
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={handleBackToStep1}
-                  className="p-2 hover:bg-stone-100 rounded-lg text-stone-500 transition"
-                  title="Kembali ke Step 1"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <div>
-                  <h2 className="text-lg font-bold text-stone-900">Pre-order Hidangan (Opsional)</h2>
-                  <p className="text-xs text-stone-500">Pesan makanan & minuman langsung agar siap begitu Anda tiba.</p>
-                </div>
-              </div>
-
-              {/* Menu Categories */}
-              <div className="flex space-x-1 overflow-x-auto pb-1 text-xs">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setMenuCategoryFilter(cat)}
-                    className={`px-3 py-1.5 rounded-full font-bold transition shrink-0 cursor-pointer ${
-                      menuCategoryFilter === cat 
-                        ? "bg-amber-800 text-white" 
-                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Menu Items Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredMenus.map(item => {
-                const qty = preorderQuantities[item.id] || 0;
-
-                return (
-                  <div 
-                    key={item.id} 
-                    className="p-4 rounded-2xl border border-stone-200 bg-stone-50/50 flex space-x-4 items-center justify-between"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="h-12 w-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl shrink-0">
-                        {item.image || "☕"}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block font-bold text-stone-900 text-sm truncate">{item.name}</span>
-                        <span className="text-xs text-stone-500 block truncate">{item.description || "Lezat dan segar"}</span>
-                        <span className="text-xs font-bold text-amber-800 mt-1 block">{formatRupiah(item.price)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 shrink-0">
-                      {qty > 0 ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => decrementMenu(item.id)}
-                            className="h-7 w-7 rounded-lg bg-white border border-stone-300 flex items-center justify-center font-bold text-stone-700 hover:bg-stone-100"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="text-sm font-bold text-stone-900 w-6 text-center">{qty}</span>
-                          <button
-                            type="button"
-                            onClick={() => incrementMenu(item.id)}
-                            className="h-7 w-7 rounded-lg bg-amber-800 text-white flex items-center justify-center font-bold hover:bg-amber-900"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => incrementMenu(item.id)}
-                          className="px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-bold bg-white text-stone-700 hover:border-amber-800 hover:text-amber-800 hover:bg-amber-50/20 transition cursor-pointer"
-                        >
-                          Tambah
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Special Notes */}
-            <div className="pt-4 border-t border-stone-100">
-              <label className="block text-xs font-bold text-stone-700 uppercase mb-2">Catatan Khusus (Notes)</label>
-              <textarea
-                rows={3}
-                placeholder="Contoh: Meja jangan dekat speaker, minta lilin ultah kecil, alergi kacang, dll."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-stone-900"
-              />
-            </div>
-          </div>
-
-          {/* Pricing Summary Sidebar */}
-          <div className="lg:col-span-4 bg-stone-900 text-white rounded-3xl p-6 sm:p-8 shadow-md flex flex-col justify-between space-y-6">
-            <div>
-              <h3 className="text-xl font-bold tracking-tight text-white mb-4">Pemesanan Anda</h3>
-
-              <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
-                {selectedPreorderItems.map(item => {
-                  const qty = preorderQuantities[item.id];
-                  const subtotal = item.price * qty;
-
-                  return (
-                    <div key={item.id} className="flex justify-between items-start text-xs border-b border-stone-800 pb-3">
-                      <div>
-                        <span className="block font-bold text-stone-200">{item.name}</span>
-                        <span className="text-stone-400">{qty}x &bull; {formatRupiah(item.price)}</span>
-                      </div>
-                      <span className="text-white font-bold">{formatRupiah(subtotal)}</span>
-                    </div>
-                  );
-                })}
-
-                {selectedPreorderItems.length === 0 && (
-                  <div className="text-center py-6 text-stone-500 text-xs bg-stone-950/20 border border-stone-800 rounded-2xl">
-                    Belum ada menu pre-order dipilih. Anda dapat melewatinya dan lanjut booking saja.
-                  </div>
-                )}
-              </div>
-
-              {/* Total Price display */}
-              <div className="pt-6 mt-6 border-t border-stone-800 flex justify-between items-center">
-                <span className="text-sm text-stone-400 font-semibold">Total Pre-order:</span>
-                <span className="text-xl font-extrabold text-amber-400">{formatRupiah(preorderTotal)}</span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={handleFinalSubmit}
-                disabled={isPending}
-                className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-black rounded-xl transition text-sm flex items-center justify-center uppercase tracking-wider shadow-md cursor-pointer"
-              >
-                {isPending ? "Sedang Mengirim..." : "Selesaikan & Book Meja"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleBackToStep1}
-                className="w-full py-2 bg-transparent hover:bg-white/5 border border-stone-800 text-stone-300 font-semibold rounded-xl text-xs transition"
-              >
-                Kembali Atur Meja
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* STEP 3: SUCCESS & SEND TO WHATSAPP */}
-      {step === 3 && successBookingCode && (
+      {/* STEP 2: SUCCESS & SEND TO WHATSAPP */}
+      {step === 2 && successBookingCode && (
         <div className="lg:col-span-12 bg-white rounded-3xl p-6 sm:p-12 border border-stone-200 shadow-lg text-center max-w-2xl mx-auto space-y-8 animate-fade-in">
           
           <div className="flex flex-col items-center">
@@ -622,34 +390,20 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                 <span className="text-stone-500 block">Jam Kunjungan:</span>
                 <span className="font-bold text-stone-800 text-sm">{time} WIB</span>
               </div>
+              <div>
+                <span className="text-stone-500 block">Jumlah Tamu:</span>
+                <span className="font-bold text-stone-800 text-sm">{guests} Orang</span>
+              </div>
               <div className="col-span-2">
                 <span className="text-stone-500 block">Catatan Khusus:</span>
                 <span className="font-medium text-stone-800">{notes || "-"}</span>
               </div>
             </div>
-
-            {selectedPreorderItems.length > 0 && (
-              <div className="border-t border-stone-200 pt-3 mt-3">
-                <span className="font-bold text-stone-900 text-xs block mb-2">Item Pre-order:</span>
-                <div className="space-y-1.5">
-                  {selectedPreorderItems.map(item => (
-                    <div key={item.id} className="flex justify-between text-xs text-stone-700">
-                      <span>{item.name} ({preorderQuantities[item.id]}x)</span>
-                      <span className="font-bold">{formatRupiah(item.price * preorderQuantities[item.id])}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between font-black text-xs text-stone-900 pt-2 border-t border-dashed border-stone-200">
-                    <span>Total Pre-order</span>
-                    <span>{formatRupiah(preorderTotal)}</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="space-y-4">
             <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-xs font-semibold leading-relaxed">
-              <strong>CRITICAL STEP:</strong> Untuk mempercepat konfirmasi pre-order dan reservasi Anda, silakan klik tombol di bawah ini untuk mengirimkan detail pemesanan ke WhatsApp resmi kami secara langsung!
+              <strong>LANGKAH SELANJUTNYA:</strong> Untuk mempercepat konfirmasi reservasi Anda, silakan klik tombol di bawah ini untuk mengirimkan detail pemesanan ke WhatsApp resmi kami secara langsung!
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -660,7 +414,7 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                 className="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-md transition text-sm cursor-pointer"
               >
                 <PhoneCall className="mr-2 h-4 w-4" />
-                Kirim Pre-order via WhatsApp
+                Kirim Konfirmasi via WhatsApp
               </a>
 
               <button

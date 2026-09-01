@@ -1,140 +1,260 @@
-import { getSession } from "../actions";
-import { railwayGetTables, railwayGetCustomers } from "@/lib/railway";
-import { 
-  CalendarRange, 
-  Grid3X3, 
-  Users2, 
-  AlertCircle, 
-  Sparkles,
-  Utensils
+import { railwayGetBookings, railwayGetCustomers, railwayGetTables } from "@/lib/railway";
+import {
+  BookOpen,
+  ChevronRight,
+  Coffee,
+  Grid3x3,
+  Settings,
+  ShieldCheck,
+  Users2,
+  UtensilsCrossed
 } from "lucide-react";
 import Link from "next/link";
-import AdminNav from "@/components/AdminNav";
+import { getSession } from "../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const session = await getSession();
-  let totalTablesCount = 0;
-  let totalCustomersCount = 0;
-
-  // Tables (GET /tables) and customers (GET /customer) are both documented,
-  // reliable endpoints - these counts are real.
-  if (session?.accessToken) {
-    const [rwTables, rwCustomers] = await Promise.all([
-      railwayGetTables(session.accessToken),
-      railwayGetCustomers(session.accessToken),
-    ]);
-    totalTablesCount = rwTables.length;
-    totalCustomersCount = rwCustomers.length;
+  if (!session || session.role !== "admin") {
+    return null; // Layout will redirect
   }
 
-  // NOTE: there is no documented endpoint for an admin to list every
-  // customer's bookings (only GET /bookings - the caller's own bookings -
-  // and PATCH /admin/bookings/:id/approve|reject are documented). Rather
-  // than call an unverified endpoint and show booking counts that might be
-  // silently wrong, this dashboard is honest about the gap - see the
-  // notice below and app/admin/bookings/page.tsx, which offers a manual
-  // approve/reject-by-ID tool as the documented-endpoint-only workaround.
+  // Fetch real data from Railway API
+  let stats = {
+    tables: 0,
+    customers: 0,
+    bookings: 0,
+    tablesByStatus: { available: 0, reserved: 0, occupied: 0 }
+  };
+
+  try {
+    const [tables, customers, bookings] = await Promise.all([
+      railwayGetTables(session.accessToken),
+      railwayGetCustomers(session.accessToken),
+      railwayGetBookings(session.accessToken, true) // Admin bookings
+    ]);
+
+    stats.tables = tables.length;
+    stats.customers = customers.length;
+    stats.bookings = bookings.length;
+
+    // Count tables by status
+    tables.forEach(t => {
+      const status = (t.status || "available").toLowerCase();
+      if (status === "available") stats.tablesByStatus.available++;
+      else if (status === "reserved") stats.tablesByStatus.reserved++;
+      else if (status === "occupied") stats.tablesByStatus.occupied++;
+    });
+  } catch (err) {
+    // Silent fail - show what we can
+  }
 
   return (
     <div className="space-y-8">
-      <AdminNav active="/admin" />
-      {/* Welcome Banner */}
-      <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-3xl">
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold mb-3 uppercase tracking-wider">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Dashboard Pengelola Cafe (Admin)</span>
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-            Selamat Datang di Portal Pengaturan CafeReserve
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-stone-900 to-stone-800 rounded-3xl p-8 sm:p-12 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="bg-amber-500/20 border border-amber-500/30 rounded-xl p-2">
+              <Coffee className="h-5 w-5 text-amber-400" />
+            </div>
+            <span className="text-sm font-semibold text-amber-400 uppercase tracking-wider">CafeReserve Admin</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-3">
+          Manajemen Cafe
           </h1>
-          <p className="text-stone-300 text-sm leading-relaxed">
-            Gunakan portal ini untuk mengelola kapasitas meja cafe dan data pelanggan yang tersinkronisasi dengan Railway API.
+          <p className="text-stone-300 text-lg max-w-2xl leading-relaxed">
+            Pantau status reservasi, meja, dan customer secara real-time. Semua data akan tersinkronisasi langsung.
           </p>
         </div>
       </div>
-      {/* Metrics Grid - only real, documented-endpoint-backed counts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="block text-xs text-stone-500 font-bold uppercase tracking-wider">Jumlah Meja</span>
-              <span className="text-3xl font-black text-blue-600 mt-1 block">{totalTablesCount}</span>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Tables Card */}
+        <div className="bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-blue-50 p-3 rounded-xl">
+              <Grid3x3 className="h-6 w-6 text-blue-600" />
             </div>
-            <div className="bg-blue-50 text-blue-800 p-2.5 rounded-xl">
-              <Grid3X3 className="h-5 w-5" />
-            </div>
+            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+              +{stats.tablesByStatus.available}
+            </span>
           </div>
+          <span className="block text-sm text-stone-500 font-semibold mb-1">Total Meja</span>
+          <span className="text-3xl font-black text-stone-900">{stats.tables}</span>
+          <p className="text-xs text-stone-400 mt-3">
+            {stats.tablesByStatus.available} tersedia • {stats.tablesByStatus.reserved} dipesan
+          </p>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="block text-xs text-stone-500 font-bold uppercase tracking-wider">Total Customer</span>
-              <span className="text-3xl font-black text-purple-600 mt-1 block">{totalCustomersCount}</span>
+
+        {/* Customers Card */}
+        <div className="bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-purple-50 p-3 rounded-xl">
+              <Users2 className="h-6 w-6 text-purple-600" />
             </div>
-            <div className="bg-purple-50 text-purple-800 p-2.5 rounded-xl">
-              <Users2 className="h-5 w-5" />
-            </div>
+            <span className="text-xs font-bold text-stone-400 px-2 py-1">Customer</span>
           </div>
+          <span className="block text-sm text-stone-500 font-semibold mb-1">Total Customer</span>
+          <span className="text-3xl font-black text-stone-900">{stats.customers}</span>
+          <p className="text-xs text-stone-400 mt-3">
+            Registered members pada platform
+          </p>
+        </div>
+
+        {/* Bookings Card */}
+        <div className="bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-orange-50 p-3 rounded-xl">
+              <BookOpen className="h-6 w-6 text-orange-600" />
+            </div>
+            <span className="text-xs font-bold text-stone-400 px-2 py-1">Total</span>
+          </div>
+          <span className="block text-sm text-stone-500 font-semibold mb-1">Semua Reservasi</span>
+          <span className="text-3xl font-black text-stone-900">{stats.bookings}</span>
+          <p className="text-xs text-stone-400 mt-3">
+            Seluruh booking (pending, approved, rejected)
+          </p>
+        </div>
+
+        {/* Settings Card */}
+        <div className="bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-amber-50 p-3 rounded-xl">
+              <Settings className="h-6 w-6 text-amber-600" />
+            </div>
+            <span className="text-xs font-bold text-stone-400 px-2 py-1">Setup</span>
+          </div>
+          <span className="block text-sm text-stone-500 font-semibold mb-1">Pengaturan Cafe</span>
+          <p className="text-xs text-stone-600 mt-4">
+            Kelola informasi cafe, nomor WA, dan pengaturan sistem
+          </p>
         </div>
       </div>
-      {/* Main Split Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Booking management pointer */}
-        <div className="lg:col-span-12 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-xs">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-stone-900 flex items-center">
-                <CalendarRange className="h-5 w-5 mr-2 text-red-600" />
-                Kelola Reservasi
-              </h2>
-              <p className="text-xs text-stone-500">
-                Approve atau reject booking menggunakan ID dari kode reservasi (contoh: BK-123 pada konfirmasi WhatsApp customer).
-              </p>
+
+      {/* Quick Actions Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Bookings Management */}
+        <Link 
+          href="/admin/bookings"
+          className="group bg-white rounded-3xl p-8 border border-stone-200 hover:shadow-lg hover:border-orange-300 transition"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-orange-50 p-3 rounded-xl">
+              <BookOpen className="h-6 w-6 text-orange-600" />
             </div>
-            <Link 
-              href="/admin/bookings" 
-              className="inline-flex items-center px-4 py-2.5 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded-xl transition shrink-0"
-            >
-              Buka Halaman Booking
-            </Link>
+            <ChevronRight className="h-5 w-5 text-stone-300 group-hover:text-orange-600 transition" />
           </div>
-        </div>
-        {/* Quick Tips Box */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 border border-stone-200 shadow-xs flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-stone-900 text-sm mb-3 flex items-center">
-              <Utensils className="h-5 w-5 mr-1.5 text-red-600" />
-              Alur Manajemen Reservasi
-            </h3>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Setiap kali customer membuat reservasi di Railway API, status pemesanan berada di kondisi <strong>PENDING</strong>. Admin dapat menyetujui atau menolak booking (menggunakan ID booking) untuk mengubah status secara real-time di Railway API.
-            </p>
+          <h3 className="text-lg font-bold text-stone-900 mb-2">Kelola Reservasi</h3>
+          <p className="text-sm text-stone-600 mb-4">
+            Approve, reject, atau selesaikan booking dari customer
+          </p>
+          <span className="inline-flex items-center text-sm font-semibold text-orange-600 group-hover:translate-x-1 transition">
+            Buka → 
+          </span>
+        </Link>
+
+        {/* Tables Management */}
+        <Link 
+          href="/admin/tables"
+          className="group bg-white rounded-3xl p-8 border border-stone-200 hover:shadow-lg hover:border-blue-300 transition"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-blue-50 p-3 rounded-xl">
+              <Grid3x3 className="h-6 w-6 text-blue-600" />
+            </div>
+            <ChevronRight className="h-5 w-5 text-stone-300 group-hover:text-blue-600 transition" />
           </div>
-          <div className="bg-red-50 border border-red-200/50 rounded-2xl p-4 mt-4">
-            <span className="text-red-950 font-bold block text-xs mb-1">Status Penjelasan</span>
-            <p className="text-[11px] text-stone-600 leading-relaxed">
-              <strong>PENDING:</strong> Menunggu verifikasi admin.<br />
-              <strong>APPROVED:</strong> Reservasi telah disetujui admin.<br />
-              <strong>REJECTED:</strong> Reservasi telah ditolak admin.
-            </p>
+          <h3 className="text-lg font-bold text-stone-900 mb-2">Kelola Meja</h3>
+          <p className="text-sm text-stone-600 mb-4">
+            Tambah, edit, atau hapus meja cafe
+          </p>
+          <span className="inline-flex items-center text-sm font-semibold text-blue-600 group-hover:translate-x-1 transition">
+            Buka →
+          </span>
+        </Link>
+
+        {/* Customers Management */}
+        <Link 
+          href="/admin/customers"
+          className="group bg-white rounded-3xl p-8 border border-stone-200 hover:shadow-lg hover:border-purple-300 transition"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-purple-50 p-3 rounded-xl">
+              <Users2 className="h-6 w-6 text-purple-600" />
+            </div>
+            <ChevronRight className="h-5 w-5 text-stone-300 group-hover:text-purple-600 transition" />
           </div>
-        </div>
-        {/* Cafe Information Card */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 border border-stone-200 shadow-xs flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-stone-900 text-sm mb-3 flex items-center">
-              <Sparkles className="h-5 w-5 mr-1.5 text-amber-700" />
-              Status Integrasi
-            </h3>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Sistem terhubung dengan Railway API untuk data meja dan customer. Fitur booking bergantung pada endpoint yang tersedia di Postman collection - lihat catatan di atas untuk keterbatasan yang berlaku saat ini.
-            </p>
+          <h3 className="text-lg font-bold text-stone-900 mb-2">Kelola Customer</h3>
+          <p className="text-sm text-stone-600 mb-4">
+            Lihat, edit, atau hapus data customer
+          </p>
+          <span className="inline-flex items-center text-sm font-semibold text-purple-600 group-hover:translate-x-1 transition">
+            Buka →
+          </span>
+        </Link>
+      </div>
+
+      {/* Secondary Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Admins */}
+        <Link 
+          href="/admin/admins"
+          className="group bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="bg-red-50 p-2.5 rounded-lg">
+              <ShieldCheck className="h-5 w-5 text-red-600" />
+            </div>
+            <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-red-600 transition" />
           </div>
-        </div>
+          <h3 className="font-bold text-stone-900 mb-1">Admin</h3>
+          <p className="text-xs text-stone-600">Kelola akun administrator</p>
+        </Link>
+
+        {/* Menu */}
+        {/* <Link 
+          href="/admin/menu"
+          className="group bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="bg-green-50 p-2.5 rounded-lg">
+              <UtensilsCrossed className="h-5 w-5 text-green-600" />
+            </div>
+            <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-green-600 transition" />
+          </div>
+          <h3 className="font-bold text-stone-900 mb-1">Menu</h3>
+          <p className="text-xs text-stone-600">Kelola menu cafe</p>
+        </Link> */}
+
+        {/* Settings */}
+        <Link 
+          href="/admin/settings"
+          className="group bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="bg-amber-50 p-2.5 rounded-lg">
+              <Settings className="h-5 w-5 text-amber-600" />
+            </div>
+            <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-amber-600 transition" />
+          </div>
+          <h3 className="font-bold text-stone-900 mb-1">Pengaturan</h3>
+          <p className="text-xs text-stone-600">Konfigurasi sistem cafe</p>
+        </Link>
+      </div>
+
+      {/* Info Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+        <h3 className="font-bold text-blue-900 mb-2 flex items-center">
+          <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-200 text-blue-900 rounded-full text-xs font-bold mr-2">ℹ</span>
+          Catatan Integrasi
+        </h3>
+        <p className="text-sm text-blue-800 leading-relaxed">
+          Semua data (meja, customer, booking, admin) tersinkronisasi real-time dengan Railway API. Perubahan akan langsung tercermin di semua bagian sistem.
+        </p>
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ export default async function MyBookingsPage() {
     },
     {} as Record<string, string>
   );
-  const cafePhone = settingsMap["cafe_phone"] || "6281234567890";
+  const cafePhone = settingsMap["cafe_phone"] || "6283857642962";
 
   const normalizedStatus = (s: string) => (s || "").toUpperCase();
   const activeBookings = railwayBookings.filter((b) =>

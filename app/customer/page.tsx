@@ -213,21 +213,14 @@ export default async function CustomerDashboardPage(props: {
             </h3>
             <ul className="space-y-4 text-xs text-stone-600 mt-4">
               <li className="flex items-start">
-                <span className="bg-amber-100 text-amber-900 h-5 w-5 rounded-full flex items-center justify-center font-bold shrink-0 mr-3 text-[10px]">1</span>
+                <span className="bg-amber-100 text-amber-900 h-5 w-5 rounded-full flex items-center justify-center font-bold shrink-0 mr-3 text-[15px]">1</span>
                 <div>
                   <strong className="block text-stone-900 mb-0.5">Buka Menu Booking Meja</strong>
                   Pilih waktu kunjungan, tentukan meja favorit, dan masukkan jumlah tamu sesuai kapasitas meja.
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-amber-100 text-amber-900 h-5 w-5 rounded-full flex items-center justify-center font-bold shrink-0 mr-3 text-[10px]">2</span>
-                <div>
-                  <strong className="block text-stone-900 mb-0.5">Pilih Menu Pre-order (Opsional)</strong>
-                  Anda dapat memesan makanan/minuman secara langsung agar disiapkan langsung begitu Anda tiba.
-                </div>
-              </li>
-              <li className="flex items-start">
-                <span className="bg-amber-100 text-amber-900 h-5 w-5 rounded-full flex items-center justify-center font-bold shrink-0 mr-3 text-[10px]">3</span>
+                <span className="bg-amber-100 text-amber-900 h-5 w-5 rounded-full flex items-center justify-center font-bold shrink-0 mr-3 text-[15px]">2</span>
                 <div>
                   <strong className="block text-stone-900 mb-0.5">Selesaikan via WhatsApp</strong>
                   Setelah submit, Anda akan mendapatkan kode booking. Anda dapat melakukan pre-order via WhatsApp resmi kami hanya dengan mengklik tombol WhatsApp yang tersedia di riwayat booking.
@@ -237,8 +230,8 @@ export default async function CustomerDashboardPage(props: {
           </div>
           <div className="bg-amber-50 border border-amber-200/50 rounded-2xl p-4 mt-6">
             <span className="text-amber-950 font-bold block text-xs mb-1">Butuh Bantuan Mendesak?</span>
-            <p className="text-[11px] text-stone-600 leading-normal">
-              Hubungi CS CafeReserve via telepon atau WhatsApp resmi di +6281234567890 jika Anda ingin melakukan perubahan jadwal dadakan.
+            <p className="text-[12px] text-stone-600 leading-normal">
+              Hubungi CS CafeReserve via telepon atau WhatsApp resmi di +6283857642962 jika Anda ingin melakukan perubahan jadwal dadakan.
             </p>
           </div>
         </div>
