@@ -1,26 +1,26 @@
 "use server";
 import { db } from "@/db";
 import { safeQuery } from "@/db/ensure";
-import { settings } from "@/db/schema";
 import {
-    railwayApproveBooking,
-    railwayCancelBooking,
-    railwayCompleteBooking,
-    railwayCreateBooking,
-    railwayCreateTable,
-    railwayDeleteAdmin,
-    railwayDeleteCustomer,
-    railwayDeleteTable,
-    railwayGetAdmins,
-    railwayGetBookings,
-    railwayGetCustomers,
-    railwayLogin,
-    railwayRegister,
-    railwayRejectBooking,
-    railwayUpdateAdmin,
-    railwayUpdateCustomer,
-    railwayUpdateTable
+  railwayApproveBooking,
+  railwayCancelBooking,
+  railwayCompleteBooking,
+  railwayCreateBooking,
+  railwayCreateTable,
+  railwayDeleteAdmin,
+  railwayDeleteCustomer,
+  railwayDeleteTable,
+  railwayGetAdmins,
+  railwayGetBookings,
+  railwayGetCustomers,
+  railwayLogin,
+  railwayRegister,
+  railwayRejectBooking,
+  railwayUpdateAdmin,
+  railwayUpdateCustomer,
+  railwayUpdateTable
 } from "@/lib/railway";
+import { Settings } from "lucide-react";
 import { cookies } from "next/headers";
 
 // NOTE ON DATA SOURCE: authentication, customers, admins, tables, and
@@ -435,36 +435,3 @@ export async function deleteAdminAction(adminId: number) {
 // --------------------------------------------------------
 // CAFE SETTINGS & MENU (local-only content - not part of the Railway API)
 // --------------------------------------------------------
-export async function updateSettingsAction(data: {
-  cafe_name: string;
-  cafe_phone: string;
-  cafe_hours: string;
-  cafe_address: string;
-  cafe_desc: string;
-}) {
-  const session = await getSession();
-  if (!session || session.role !== "admin") {
-    return { error: "Akses ditolak." };
-  }
-  try {
-    if (process.env.DATABASE_URL) {
-      await safeQuery(
-        async () => {
-          for (const [key, value] of Object.entries(data)) {
-            await db
-              .insert(settings)
-              .values({ key, value })
-              .onConflictDoUpdate({
-                target: settings.key,
-                set: { value },
-              });
-          }
-        },
-        null
-      );
-    }
-    return { success: true };
-  } catch (error: any) {
-    return { error: "Gagal menyimpan pengaturan: " + error.message };
-  }
-}

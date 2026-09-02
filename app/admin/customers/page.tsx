@@ -1,24 +1,60 @@
+"use client";
+
 import AdminNav from "@/components/AdminNav";
 import {
   Mail,
   Phone,
   PhoneCall,
+  Search,
   Users2,
+  X
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { listCustomersAction } from "../../actions";
 import CustomerEditForm from "./CustomerEditForm";
 import DeleteCustomerButton from "./DeleteCustomerButton";
 
-export const dynamic = "force-dynamic";
+interface Customer {
+  id: number;
+  name?: string;
+  email: string;
+  phone?: string;
+}
 
-export default async function ManageCustomersPage(props: {
+export default function ManageCustomersPage(props: {
   searchParams: Promise<{ success?: string; error?: string }>;
 }) {
-  const searchParams = await props.searchParams;
+  const [customersList, setCustomersList] = useState<Customer[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useState<{ success?: string; error?: string }>({});
 
-  // Customers come exclusively from Railway - GET /customer.
-  const res = await listCustomersAction();
-  const customersList = res.customers || [];
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const params = await props.searchParams;
+        setSearchParams(params);
+        const res = await listCustomersAction();
+        setCustomersList(res.customers || []);
+      } catch (error) {
+        console.error("Error loading customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCustomers();
+  }, [props.searchParams]);
+
+  const filteredCustomers = customersList.filter((c) => {
+    const name = c.name || c.email.split("@")[0];
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      name.toLowerCase().includes(searchLower) ||
+      c.email.toLowerCase().includes(searchLower) ||
+      (c.phone?.toLowerCase().includes(searchLower) ?? false)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -38,14 +74,32 @@ export default async function ManageCustomersPage(props: {
         </div>
       )}
       <div className="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 bg-stone-50/50 border-b border-stone-200 flex items-center justify-between">
+        <div className="px-6 py-4 bg-stone-50/50 border-b border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-sm font-bold text-stone-900 flex items-center">
             <Users2 className="mr-2 h-4 w-4 text-red-600" />
-            Pelanggan Terdaftar ({customersList.length})
+            Pelanggan Terdaftar ({filteredCustomers.length})
           </h2>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+            <input
+              type="text"
+              placeholder="Cari nama, email, atau nomor..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600 transition"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
         <div className="divide-y divide-stone-150">
-          {customersList.map((c) => {
+          {filteredCustomers.map((c) => {
             const name = c.name || c.email.split("@")[0];
             return (
               <div
@@ -84,7 +138,7 @@ export default async function ManageCustomersPage(props: {
                       target="_blank"
                       rel="noreferrer"
                       className="p-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl transition border border-green-200/50"
-                      title="Hubungi Customer via WhatsApp"
+                      title="Hubungi Customer Via WhatsApp"
                     >
                       <PhoneCall className="h-4 w-4" />
                     </a>
@@ -105,6 +159,11 @@ export default async function ManageCustomersPage(props: {
           {customersList.length === 0 && (
             <div className="p-16 text-center text-stone-500 italic bg-stone-50/50">
               Belum ada pelanggan terdaftar saat ini.
+            </div>
+          )}
+          {customersList.length > 0 && filteredCustomers.length === 0 && (
+            <div className="p-16 text-center text-stone-500 italic bg-stone-50/50">
+              Tidak ada hasil pencarian untuk "{searchQuery}"
             </div>
           )}
         </div>

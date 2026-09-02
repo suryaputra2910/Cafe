@@ -1,7 +1,6 @@
+import { CalendarRange, Coffee, Grid3X3, LayoutDashboard, LogOut, ShieldCheck, Users2 } from "lucide-react";
 import Link from "next/link";
-import { LayoutDashboard, CalendarRange, Grid3X3, Users2, ShieldCheck, LogOut, Coffee } from "lucide-react";
-import { logoutAction } from "@/app/actions";
-import { redirect } from "next/navigation";
+import { handleAdminLogout } from "./admin-logout-action";
 
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -12,11 +11,6 @@ const ADMIN_LINKS = [
 ];
 
 export default function AdminNav({ active }: { active: string }) {
-  async function handleLogout() {
-    "use server";
-    await logoutAction();
-    redirect("/login");
-  }
 
   return (
     <div className="bg-stone-900 border border-stone-800 rounded-3xl p-4 sm:px-6 sm:py-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
@@ -55,7 +49,7 @@ export default function AdminNav({ active }: { active: string }) {
       </div>
 
       {/* Logout Button */}
-      <form action={handleLogout} className="shrink-0">
+      <form action={handleAdminLogout} className="shrink-0">
         <button
           type="submit"
           className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 hover:bg-red-600/90 text-stone-300 hover:text-white text-xs font-bold rounded-xl border border-stone-700 hover:border-red-500 transition cursor-pointer"

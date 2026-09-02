@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getSession } from "./actions";
 import { db } from "@/db";
-import { settings } from "@/db/schema";
 import { safeQuery } from "@/db/ensure";
 import { seedDatabase } from "@/db/seed";
 import { eq } from "drizzle-orm";
@@ -18,7 +17,8 @@ import {
   Heart,
   CheckCircle,
   Utensils,
-  ExternalLink
+  ExternalLink,
+  Settings
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -32,7 +32,7 @@ export default async function LandingPage() {
     await seedDatabase().catch(() => null);
   }
   const allSettings = await safeQuery(
-    () => db.select().from(settings),
+    () => db.select().from(Settings),
     [] as Array<{ id: number; key: string; value: string }>
   );
   const settingsMap = allSettings.reduce((acc, curr) => {

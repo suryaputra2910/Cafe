@@ -1,6 +1,6 @@
 import { db } from "./index";
-import { settings } from "./schema";
 import { ensureSchema } from "./ensure";
+import { Settings } from "lucide-react";
 
 // NOTE: this used to also seed local `users` and `tables` rows (including a
 // plaintext-password demo admin/customer account). Those two tables are no
@@ -19,7 +19,7 @@ export async function seedDatabase() {
       return { success: false, error: "Database schema could not be created" };
     }
     // 5. Seed App Settings
-    const settingsCheck = await db.select().from(settings);
+    const settingsCheck = await db.select().from(Settings);
     if (settingsCheck.length === 0) {
       const defaultSettings = [
         { key: "cafe_name", value: "CafeReserve & Roastery" },
@@ -28,7 +28,7 @@ export async function seedDatabase() {
         { key: "cafe_address", value: "Jl. Senopati Raya No. 12, Kebayoran Baru, Jakarta Selatan" },
         { key: "cafe_desc", value: "Kafe modern dengan konsep nyaman yang menyajikan biji kopi pilihan terbaik, hidangan lezat, dan ruang kumpul/kerja yang estetik." },
       ];
-      await db.insert(settings).values(defaultSettings);
+      await db.insert(Settings).values(defaultSettings);
       console.log(`✓ Seeded default app settings.`);
     }
 

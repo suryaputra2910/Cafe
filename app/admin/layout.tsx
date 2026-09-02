@@ -6,10 +6,8 @@ import {
       Home,
       LayoutDashboard,
       LogOut,
-      Settings,
       ShieldCheck,
       Users,
-      UtensilsCrossed
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -113,13 +111,7 @@ export default async function AdminLayout({
             <BarChart3 className="h-5 w-5" />
             <span>Reports</span>
           </Link>
-          <Link
-            href="/admin/settings"
-            className="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-sm hover:bg-stone-800 transition text-stone-300"
-          >
-            <Settings className="h-5 w-5" />
-            <span>Settings</span>
-          </Link>
+          
         </nav>
 
         {/* Footer */}

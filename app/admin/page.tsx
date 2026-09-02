@@ -231,7 +231,7 @@ export default async function AdminDashboardPage() {
         </Link> */}
 
         {/* Settings */}
-        <Link 
+        {/* <Link 
           href="/admin/settings"
           className="group bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md transition"
         >
@@ -243,7 +243,7 @@ export default async function AdminDashboardPage() {
           </div>
           <h3 className="font-bold text-stone-900 mb-1">Pengaturan</h3>
           <p className="text-xs text-stone-600">Konfigurasi sistem cafe</p>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Info Section */}

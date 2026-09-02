@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { safeQuery } from "@/db/ensure";
-import { settings } from "@/db/schema";
+import {} from "@/db/schema";
 import {
   AlertTriangle,
   CheckCircle,
@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { updateSettingsAction } from "../../actions";
 export const dynamic = "force-dynamic";
 export default async function CafeSettingsPage(props: {
   searchParams: Promise<{ success?: string; error?: string }>;
@@ -20,7 +19,7 @@ export default async function CafeSettingsPage(props: {
   const searchParams = await props.searchParams;
   // Fetch settings safely
   const allSettings = await safeQuery(
-    () => db.select().from(settings),
+    () => db.select().from(Settings),
     [] as Array<{ id: number; key: string; value: string }>
   );
   const settingsMap = allSettings.reduce((acc, curr) => {
@@ -32,25 +31,6 @@ export default async function CafeSettingsPage(props: {
   const cafeHours = settingsMap["cafe_hours"] || "Setiap Hari (09:00 - 23:00)";
   const cafeAddress = settingsMap["cafe_address"] || "Jl. Senopati Raya No. 12, Kebayoran Baru, Jakarta Selatan";
   const cafeDesc = settingsMap["cafe_desc"] || "Kafe modern dengan konsep nyaman yang menyajikan biji kopi pilihan terbaik, hidangan lezat, dan ruang kumpul/kerja yang estetik.";
-  // Form submit handler
-  async function handleSaveSettings(formData: FormData) {
-    "use server";
-    
-    const data = {
-      cafe_name: (formData.get("cafe_name") as string) || "CafeReserve & Roastery",
-      cafe_phone: (formData.get("cafe_phone") as string) || "6281234567890",
-      cafe_hours: (formData.get("cafe_hours") as string) || "Setiap Hari (09:00 - 23:00)",
-      cafe_address: (formData.get("cafe_address") as string) || "Jl. Senopati Raya No. 12, Kebayoran Baru, Jakarta Selatan",
-      cafe_desc: (formData.get("cafe_desc") as string) || "",
-    };
-    const res = await updateSettingsAction(data);
-    if (res?.error) {
-      redirect(`/admin/settings?error=${encodeURIComponent(res.error)}`);
-    } else {
-      revalidatePath("/admin/settings");
-      redirect(`/admin/settings?success=Pengaturan+berhasil+disimpan%21`);
-    }
-  }
 
   return (
     <div className="space-y-8">
@@ -83,7 +63,7 @@ export default async function CafeSettingsPage(props: {
               <p className="text-xs text-stone-500">Sesuaikan data yang akan tampil di halaman utama (Landing Page)</p>
             </div>
           </div>
-          <form action={handleSaveSettings} className="space-y-6">
+          <form className="space-y-6">
             <div>
               <label className="block text-xs font-bold text-stone-700 uppercase mb-2">Nama Cafe</label>
               <div className="relative">
@@ -184,4 +164,8 @@ export default async function CafeSettingsPage(props: {
       </div>
     </div>
   );
+}
+
+function updateSettingsAction(data: { cafe_name: string; cafe_phone: string; cafe_hours: string; cafe_address: string; cafe_desc: string; }) {
+  throw new Error("Function not implemented.");
 }

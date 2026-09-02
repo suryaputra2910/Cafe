@@ -1,14 +1,13 @@
 import { getSession } from "../actions";
 import { db } from "@/db";
-import { settings } from "@/db/schema";
 import { safeQuery } from "@/db/ensure";
 import Navbar from "../../components/Navbar";
-import { MapPin, Clock, Phone, ExternalLink } from "lucide-react";
+import { MapPin, Clock, Phone, ExternalLink, Settings } from "lucide-react";
 export const dynamic = "force-dynamic";
 export default async function KontakPage() {
   const session = await getSession();
   const allSettings = await safeQuery(
-    () => db.select().from(settings),
+    () => db.select().from(Settings),
     [] as Array<{ id: number; key: string; value: string }>
   );
   const settingsMap = allSettings.reduce((acc, curr) => {
