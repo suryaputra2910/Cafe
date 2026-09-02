@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, boolean, date } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 // Users Table (Customers and Admins)
 export const users = pgTable("users", {
@@ -38,4 +38,11 @@ export const bookings = pgTable("bookings", {
   preorderItems: text("preorder_items"), // JSON representation of pre-ordered items: [{itemId: 1, name: 'Kopi', qty: 2, price: 15000}]
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Settings (Cafe Configuration)
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(), // e.g., 'cafe_name', 'cafe_phone', 'cafe_address'
+  value: text("value").notNull(),
 });
