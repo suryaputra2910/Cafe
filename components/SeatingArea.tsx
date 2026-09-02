@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { ArrowRight, Check, ChevronDown, Info, Sparkles, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Info, Users, Sparkles, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 /* -------------------------------------------------------------------------- */
 /*  Data Structure & Dummy Data                                              */
@@ -188,7 +188,6 @@ export default function SeatingAreaSelector() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
         {seatingAreas.map((area) => {
           const isSelected = selectedArea?.id === area.id;
-          const isFull = !area.available;
           const isMobileExpanded = mobileExpandedId === area.id;
 
           return (
@@ -196,9 +195,7 @@ export default function SeatingAreaSelector() {
               key={area.id}
               className={`group flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-500 ${isSelected
                   ? "border-amber-600 shadow-xl ring-2 ring-amber-500/40"
-                  : isFull
-                    ? "border-stone-200"
-                    : "border-stone-200/80 shadow-sm hover:border-amber-500/50 hover:shadow-xl"
+                  : "border-stone-200/80 shadow-sm hover:border-amber-500/50 hover:shadow-xl"
                 }`}
             >
               {/* Photo with zoom on hover */}
@@ -207,21 +204,12 @@ export default function SeatingAreaSelector() {
                 <img
                   src={area.image}
                   alt={area.name}
-                  className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${isFull ? "" : ""
-                    }`}
+                  className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105`}
                 />
 
                 {/* Atmosphere badge */}
                 <span className="absolute left-3 top-3 rounded-full bg-[#5C4033]/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-xs">
                   {area.atmosphere}
-                </span>
-
-                {/* Availability badge */}
-                <span
-                  className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${isFull ? "bg-stone-600/90" : "bg-green-600/90"
-                    }`}
-                >
-                  {isFull ? "Penuh" : "Tersedia"}
                 </span>
 
                 {/* Tick mark once chosen */}
@@ -307,9 +295,7 @@ export default function SeatingAreaSelector() {
                 >
                   {isSelected
                     ? "Area Dipilih ✓"
-                    : isFull
-                      ? "Pilih Area"
-                      : "Pilih Area"}
+                    : "Pilih Area"}
                 </button>
               </div>
             </article>
