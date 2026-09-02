@@ -308,8 +308,8 @@ export default function SeatingAreaSelector() {
                   {isSelected
                     ? "Area Dipilih ✓"
                     : isFull
-                      ? "Area Penuh"
-                      : "Lebih Lengkap"}
+                      ? "Pilih Area"
+                      : "Pilih Area"}
                 </button>
               </div>
             </article>
