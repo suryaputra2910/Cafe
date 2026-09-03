@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession, logoutAction } from "../actions";
+import AdminMobileSidebar from "@/components/AdminMobileSidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -41,8 +42,11 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
-      <aside className="w-full md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex flex-col border-r border-stone-800">
+      {/* Mobile Sidebar (hamburger + drawer) — client component */}
+      <AdminMobileSidebar logoutAction={handleLogout} />
+
+      {/* Desktop Sidebar — hidden on mobile */}
+      <aside className="hidden md:flex md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex-col border-r border-stone-800">
         {/* Brand Header */}
         <div className="p-6 border-b border-stone-800 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group">

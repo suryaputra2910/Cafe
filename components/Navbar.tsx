@@ -56,9 +56,7 @@ export default function Navbar({
       document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
-  /**
-   * Determines if a navigation link should be highlighted as active.
-   */
+
   function isActive(link: NavLink) {
     if (link.route === "/") {
       return pathname === "/";

@@ -10,6 +10,7 @@ import {
   Home, 
   ExternalLink 
 } from "lucide-react";
+import CustomerMobileSidebar from "@/components/CustomerMobileSidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +35,16 @@ export default async function CustomerLayout({
 
   return (
     <div className="min-h-screen bg-stone-100 flex flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
-      <aside className="w-full md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex flex-col border-r border-stone-800">
+      {/* Mobile Sidebar (hamburger + drawer) — client component */}
+      <CustomerMobileSidebar
+        logoutAction={handleLogout}
+        userName={session.name}
+        userRole={session.role}
+        isAdmin={session.role === "admin"}
+      />
+
+      {/* Desktop Sidebar — hidden on mobile */}
+      <aside className="hidden md:flex md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex-col border-r border-stone-800">
         {/* Brand Header */}
         <div className="p-6 border-b border-stone-800 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group">
@@ -74,7 +83,7 @@ export default async function CustomerLayout({
             className="flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-800 hover:text-white transition"
           >
             <LayoutDashboard className="h-4 w-4 text-amber-400" />
-            <span>Dashboard & Profil</span>
+            <span>Dashboard &amp; Profil</span>
           </Link>
 
           <Link
@@ -90,7 +99,7 @@ export default async function CustomerLayout({
             className="flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-800 hover:text-white transition"
           >
             <History className="h-4 w-4 text-amber-400" />
-            <span>Booking & Riwayat Saya</span>
+            <span>Booking &amp; Riwayat Saya</span>
           </Link>
         </nav>
 
@@ -120,26 +129,6 @@ export default async function CustomerLayout({
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Mobile Header Bar */}
-        <header className="bg-white md:hidden border-b border-stone-200 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Coffee className="h-6 w-6 text-amber-800" />
-            <span className="font-bold text-stone-900 text-md">CafeReserve</span>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Link href="/customer" className="text-stone-600 hover:text-amber-800 text-xs font-semibold">
-              Profil
-            </Link>
-            <Link href="/customer/booking" className="text-stone-600 hover:text-amber-800 text-xs font-semibold">
-              Book Meja
-            </Link>
-            <Link href="/customer/my-bookings" className="text-stone-600 hover:text-amber-800 text-xs font-semibold">
-              Riwayat
-            </Link>
-          </div>
-        </header>
-
         {/* Content Wrapper */}
         <div className="p-4 sm:p-8 lg:p-10 max-w-7xl w-full mx-auto">
           {children}
