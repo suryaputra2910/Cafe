@@ -12,8 +12,8 @@ import {
   Utensils
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { bookTableAction } from "../../actions";
+import { useState, useEffect, useCallback } from "react";
+import { bookTableAction, getAvailableBookingsAction } from "../../actions";
 
 interface Table {
   id: number;
@@ -60,8 +60,25 @@ export default function BookingFormClient({ tables, bookings, menus, cafePhone, 
   const [error, setError] = useState<string | null>(null);
   const [successBookingCode, setSuccessBookingCode] = useState<string | null>(null);
 
-  // Keep conflicts returned by Railway after a concurrent booking attempt.
   const [conflictingBookings, setConflictingBookings] = useState<{tableId: number, date: string, time: string}[]>([]);
+
+  // State to hold dynamically fetched bookings
+  const [dynamicBookings, setDynamicBookings] = useState<RailwayBooking[]>(bookings);
+
+  // Fetch updated bookings when date or time changes
+  useEffect(() => {
+    let isMounted = true;
+    if (date && time) {
+      getAvailableBookingsAction().then((res) => {
+        if (isMounted && res.success && res.bookings) {
+          setDynamicBookings(res.bookings);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [date, time]);
 
   // Get selected table object
   const selectedTable = tables.find(t => t.id === selectedTableId);
@@ -84,7 +101,7 @@ export default function BookingFormClient({ tables, bookings, menus, cafePhone, 
   const isTableBooked = (tableId: number) => {
     if (!date || !time) return false;
     const requestedEndTime = bookingEndTime(time);
-    return bookings.some(booking =>
+    return dynamicBookings.some(booking =>
       booking.tableId === tableId &&
       normalizeBookingDate(booking.bookingDate) === date &&
       isBookingActive(booking.status) &&

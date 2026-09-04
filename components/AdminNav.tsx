@@ -31,7 +31,7 @@ export default function AdminNav({ active }: { active: string }) {
       </div>
 
       {/* Navigation Links */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 bg-stone-950/60 border border-stone-800/80 rounded-2xl p-1.5">
+      {/* <div className="flex flex-wrap items-center justify-center gap-1.5 bg-stone-950/60 border border-stone-800/80 rounded-2xl p-1.5">
         {ADMIN_LINKS.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
@@ -46,7 +46,7 @@ export default function AdminNav({ active }: { active: string }) {
             {label}
           </Link>
         ))}
-      </div>
+      </div> */}
 
       {/* Logout Button */}
       <form action={handleAdminLogout} className="shrink-0">

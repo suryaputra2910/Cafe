@@ -163,6 +163,15 @@ export async function bookTableAction(data: {
   };
 }
 
+export async function getAvailableBookingsAction() {
+  const session = await getSession();
+  if (!session) {
+    return { error: "Anda harus login terlebih dahulu.", bookings: [] };
+  }
+  const bookings = await railwayGetBookings(session.accessToken);
+  return { success: true, bookings };
+}
+
 /**
  * NOT SUPPORTED: the Railway API does not provide any endpoint for a
  * customer to cancel or delete their own booking (only admin approve/reject

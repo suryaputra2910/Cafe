@@ -1,5 +1,4 @@
 import { getSession, listAllBookingsAction } from "../../actions";
-import AdminNav from "@/components/AdminNav";
 import BookingsAdminClient, { BookingItem } from "./BookingsAdminClient";
 import ManualBookingAction from "./ManualBookingAction";
 
@@ -12,7 +11,6 @@ export default async function ManageBookingsPage() {
 
   return (
     <div className="space-y-8">
-      <AdminNav active="/admin/bookings" />
 
       {/* Header Banner */}
       <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

@@ -72,9 +72,6 @@ export default function CustomerMobileSidebar({
               <span className="font-bold text-white block leading-tight">
                 CafeReserve
               </span>
-              <span className="text-[9px] text-stone-500 uppercase tracking-wide">
-                Customer Portal
-              </span>
             </div>
           </div>
 
@@ -111,7 +108,6 @@ export default function CustomerMobileSidebar({
             <div>
               <span className="font-bold text-white block">CafeReserve</span>
               <span className="text-[10px] text-stone-500 uppercase tracking-wide">
-                Customer Portal
               </span>
             </div>
           </Link>

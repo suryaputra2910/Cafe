@@ -56,9 +56,6 @@ export default async function CustomerLayout({
               <span className="text-md font-bold tracking-tight text-white block">
                 CafeReserve
               </span>
-              <span className="text-[10px] block text-stone-500 font-semibold tracking-wide uppercase">
-                Customer Portal
-              </span>
             </div>
           </Link>
           <Link href="/" className="text-stone-500 hover:text-white transition" title="Lihat Beranda">
