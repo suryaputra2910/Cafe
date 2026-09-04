@@ -2,7 +2,7 @@ import { db } from "@/db";
 
 import { safeQuery } from "@/db/ensure";
 import { settings } from "@/db/schema";
-import { railwayGetTables } from "@/lib/railway";
+import { railwayGetBookings, railwayGetTables } from "@/lib/railway";
 import { redirect } from "next/navigation";
 import { getSession } from "../../actions";
 import BookingFormClient from "./BookingFormClient";
@@ -16,6 +16,7 @@ export default async function BookingMejaPage() {
     redirect("/admin/bookings");
   }
   const rwTables = await railwayGetTables(session.accessToken);
+  const bookings = await railwayGetBookings(session.accessToken);
   const allTables: Array<{
     id: number;
     number: string;
@@ -53,6 +54,7 @@ export default async function BookingMejaPage() {
       </div>
       <BookingFormClient 
         tables={allTables}
+        bookings={bookings}
         cafePhone={cafePhone}
         userName={session.name}
         menus={[]}

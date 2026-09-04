@@ -1,14 +1,15 @@
 "use client";
 
+import type { RailwayBooking } from "@/lib/railway";
 import {
-    Calendar,
-    Check,
-    CheckCircle2,
-    ChevronRight,
-    Info,
-    PhoneCall,
-    Users,
-    Utensils
+  Calendar,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Info,
+  PhoneCall,
+  Users,
+  Utensils
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -35,12 +36,13 @@ interface MenuItem {
 
 interface BookingFormClientProps {
   tables: Table[];
+  bookings: RailwayBooking[];
   menus: MenuItem[];
   cafePhone: string;
   userName: string;
 }
 
-export default function BookingFormClient({ tables, menus, cafePhone, userName }: BookingFormClientProps) {
+export default function BookingFormClient({ tables, bookings, menus, cafePhone, userName }: BookingFormClientProps) {
   const router = useRouter();
   
   // Step 1 or Step 2 (Success) - removed menu selection step
@@ -58,11 +60,37 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
   const [error, setError] = useState<string | null>(null);
   const [successBookingCode, setSuccessBookingCode] = useState<string | null>(null);
 
-  // Track conflicting bookings to update UI availability
+  // Keep conflicts returned by Railway after a concurrent booking attempt.
   const [conflictingBookings, setConflictingBookings] = useState<{tableId: number, date: string, time: string}[]>([]);
 
   // Get selected table object
   const selectedTable = tables.find(t => t.id === selectedTableId);
+
+  const bookingEndTime = (startTime: string) => {
+    const [hour, minute] = startTime.split(":").map(Number);
+    return `${String((hour + 2) % 24).padStart(2, "0")}:${String(minute || 0).padStart(2, "0")}`;
+  };
+
+  const normalizeBookingDate = (bookingDate: string) => bookingDate.includes("T")
+    ? bookingDate.split("T")[0]
+    : bookingDate;
+
+  const hasTimeOverlap = (startTime: string, endTime: string, otherStart: string, otherEnd: string) =>
+    startTime < otherEnd && endTime > otherStart;
+
+  const isBookingActive = (status: string) =>
+    !["REJECTED", "CANCELLED", "COMPLETED"].includes(status.toUpperCase());
+
+  const isTableBooked = (tableId: number) => {
+    if (!date || !time) return false;
+    const requestedEndTime = bookingEndTime(time);
+    return bookings.some(booking =>
+      booking.tableId === tableId &&
+      normalizeBookingDate(booking.bookingDate) === date &&
+      isBookingActive(booking.status) &&
+      hasTimeOverlap(time, requestedEndTime, booking.startTime, booking.endTime)
+    );
+  };
 
   // Format helper for Rupiah
   const formatRupiah = (num: number) => {
@@ -198,7 +226,10 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                   required
                   min={new Date().toISOString().split("T")[0]}
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setSelectedTableId(null);
+                  }}
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-stone-900" 
                 />
               </div>
@@ -207,7 +238,10 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                 <label className="block text-xs font-bold text-stone-700 uppercase mb-2">Jam Kedatangan</label>
                 <select 
                   value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  onChange={(e) => {
+                    setTime(e.target.value);
+                    setSelectedTableId(null);
+                  }}
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-stone-900 bg-white"
                 >
                   {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"].map(t => (
@@ -251,7 +285,7 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                 {filteredTables.map(t => {
                   const isSelected = selectedTableId === t.id;
                   const isOverCapacity = guests > t.capacity;
-                  const isConflict = conflictingBookings.some(cb => cb.tableId === t.id && cb.date === date && cb.time === time);
+                  const isConflict = isTableBooked(t.id) || conflictingBookings.some(cb => cb.tableId === t.id && cb.date === date && cb.time === time);
                   const isAvailable = !isConflict;
 
                   return (
