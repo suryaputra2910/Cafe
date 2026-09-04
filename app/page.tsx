@@ -8,15 +8,9 @@ import {
   Coffee,
   MapPin,
   Clock,
-  Phone,
-  Globe,
-  ChevronRight,
   Sparkles,
-  Users,
-  Calendar,
   Heart,
   CheckCircle,
-  Utensils,
   ExternalLink,
   Settings
 } from "lucide-react";
@@ -363,16 +357,15 @@ export default async function LandingPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center border-b border-stone-900 pb-8 mb-8 gap-4">
             <div>
               <span className="text-white font-bold text-lg">{cafeName}</span>
-              <p className="text-xs text-stone-500 mt-1">Sistem Reservasi Meja & Menu Cafe Pintar</p>
+              <p className="text-xs text-stone-500 mt-1">Sistem Reservasi Meja Basis Web</p>
             </div>
             <div className="flex space-x-6 text-sm">
-              <Link href="/login" className="hover:text-white transition">Customer Portal</Link>
-              <Link href="/login" className="hover:text-white transition">Admin Portal</Link>
+              <Link href="/login" className="hover:text-white transition"></Link>
+              <Link href="/login" className="hover:text-white transition">AdminNav</Link>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row justify-between text-xs text-stone-600">
             <span>&copy; {new Date().getFullYear()} {cafeName}. Hak Cipta Dilindungi.</span>
-            <span className="mt-2 sm:mt-0">Dibuat dengan Next.js & PostgreSQL</span>
           </div>
         </div>
       </footer>

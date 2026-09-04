@@ -11,6 +11,7 @@ import {
   ExternalLink 
 } from "lucide-react";
 import CustomerMobileSidebar from "@/components/CustomerMobileSidebar";
+import { GeistSans } from "geist/font/sans";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ export default async function CustomerLayout({
       />
 
       {/* Desktop Sidebar — hidden on mobile */}
-      <aside className="hidden md:flex md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex-col border-r border-stone-800">
+      <aside className={`hidden md:flex md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex-col border-r border-stone-800 ${GeistSans.className}`}>
         {/* Brand Header */}
         <div className="p-6 border-b border-stone-800 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group">

@@ -14,6 +14,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { GeistSans } from "geist/font/sans";
 
 interface CustomerMobileSidebarProps {
   logoutAction: () => Promise<void>;
@@ -93,7 +94,7 @@ export default function CustomerMobileSidebar({
 
       {/* Mobile Drawer */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-stone-900 text-stone-300 flex flex-col transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-stone-900 text-stone-300 flex flex-col transition-transform duration-300 ease-in-out md:hidden ${GeistSans.className} ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

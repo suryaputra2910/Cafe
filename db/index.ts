@@ -4,7 +4,7 @@
 
 const DEFAULT_SETTINGS = [
   { id: 1, key: "cafe_name", value: "CafeReserve & Roastery" },
-  { id: 2, key: "cafe_phone", value: "6281234567890" },
+  { id: 2, key: "cafe_phone", value: "6283857642962" },
   { id: 3, key: "cafe_hours", value: "Setiap Hari (09:00 - 23:00)" },
   { id: 4, key: "cafe_address", value: "Jl. Senopati Raya No. 12, Kebayoran Baru, Jakarta Selatan" },
   { id: 5, key: "cafe_desc", value: "Kafe modern dengan konsep nyaman yang menyajikan biji kopi pilihan terbaik." },

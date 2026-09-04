@@ -199,7 +199,7 @@ export default function HomepageReservationForm({
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTables.map((t) => {
-            const isAvailable = (t.status || "").toLowerCase() === "available";
+            const isAvailable = true; // Conflicts are date/time specific, checked during booking
             const isSelected = selectedTableId === t.id;
             const isTooSmall = guests > t.capacity;
 
@@ -225,12 +225,8 @@ export default function HomepageReservationForm({
                       {t.number}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                        isAvailable 
-                          ? "bg-green-100 text-green-800 border border-green-200" 
-                          : "bg-red-100 text-red-800 border border-red-200"
-                      }`}>
-                        {isAvailable ? "Available" : "Unavailable / Reserved"}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-green-100 text-green-800 border border-green-200`}>
+                        Tersedia
                       </span>
                     </div>
                   </div>

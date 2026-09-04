@@ -58,6 +58,9 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
   const [error, setError] = useState<string | null>(null);
   const [successBookingCode, setSuccessBookingCode] = useState<string | null>(null);
 
+  // Track conflicting bookings to update UI availability
+  const [conflictingBookings, setConflictingBookings] = useState<{tableId: number, date: string, time: string}[]>([]);
+
   // Get selected table object
   const selectedTable = tables.find(t => t.id === selectedTableId);
 
@@ -110,7 +113,12 @@ export default function BookingFormClient({ tables, menus, cafePhone, userName }
       });
 
       if (res.error) {
-        setError(res.error);
+        if (res.error.toLowerCase().includes("sudah di booking") || res.error.toLowerCase().includes("sudah dipesan") || res.error.toLowerCase().includes("conflict")) {
+          setError("Meja ini sudah dipesan pada waktu tersebut. Silakan pilih meja atau waktu lain.");
+          setConflictingBookings(prev => [...prev, { tableId: selectedTableId!, date, time }]);
+        } else {
+          setError(res.error);
+        }
         setIsPending(false);
       } else if (res.success && res.booking) {
         // Railway's booking response has an `id`, not a `bookingCode` - build
@@ -243,14 +251,19 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                 {filteredTables.map(t => {
                   const isSelected = selectedTableId === t.id;
                   const isOverCapacity = guests > t.capacity;
+                  const isConflict = conflictingBookings.some(cb => cb.tableId === t.id && cb.date === date && cb.time === time);
+                  const isAvailable = !isConflict;
 
                   return (
                     <button
                       key={t.id}
                       type="button"
+                      disabled={!isAvailable || isOverCapacity}
                       onClick={() => setSelectedTableId(t.id)}
                       className={`text-left p-5 rounded-2xl border transition relative flex flex-col justify-between h-40 group cursor-pointer ${
-                        isSelected 
+                        !isAvailable || isOverCapacity
+                          ? "bg-stone-100/80 border-stone-200 opacity-60 cursor-not-allowed"
+                          : isSelected 
                           ? "border-amber-800 bg-amber-50/20 ring-2 ring-amber-500/50" 
                           : "border-stone-200 hover:border-amber-500/50 bg-white"
                       }`}
@@ -261,9 +274,9 @@ Terima kasih! Mohon konfirmasi reservasi saya.`;
                             {t.number}
                           </span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                            t.status === "available" ? "bg-green-100 text-green-900" : "bg-stone-200 text-stone-700"
+                            isAvailable ? "bg-green-100 text-green-900" : "bg-stone-200 text-stone-700"
                           }`}>
-                            {t.status === "available" ? "Tersedia" : t.status}
+                            {isAvailable ? "Tersedia" : "Tidak Tersedia"}
                           </span>
                         </div>
                         <p className="text-xs text-stone-500 mt-2 line-clamp-2">

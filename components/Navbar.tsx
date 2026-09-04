@@ -161,9 +161,16 @@ export default function Navbar({
           )}
         </button>
       </div>
-      {/* ---------------------------- Mobile Menu Drawer ---------------------------- */}
+      {/* ---------------------------- Mobile Menu Backdrop & Drawer ---------------------------- */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 top-[72px] bg-black/50 backdrop-blur-sm transition-opacity lg:hidden z-40"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
       <div
-        className={`overflow-hidden bg-[#5C4033] transition-all duration-300 lg:hidden ${
+        className={`absolute top-[72px] left-0 w-full overflow-hidden bg-[#5C4033] transition-all duration-300 lg:hidden z-50 shadow-xl ${
           isMobileMenuOpen
             ? "max-h-[28rem] border-t border-white/10"
             : "max-h-0"

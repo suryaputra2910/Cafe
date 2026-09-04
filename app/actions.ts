@@ -1,6 +1,4 @@
 "use server";
-import { db } from "@/db";
-import { safeQuery } from "@/db/ensure";
 import {
   railwayApproveBooking,
   railwayCancelBooking,
@@ -20,7 +18,6 @@ import {
   railwayUpdateCustomer,
   railwayUpdateTable
 } from "@/lib/railway";
-import { Settings } from "lucide-react";
 import { cookies } from "next/headers";
 
 // NOTE ON DATA SOURCE: authentication, customers, admins, tables, and

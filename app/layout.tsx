@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CafeReserve - Pesan Meja Cafe Online",
-  description: "Platform pemesanan meja cafe dengan fitur pre-order via WhatsApp",
+  description: "Platform pemesanan meja cafe menggunakan web",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
